@@ -54,8 +54,8 @@ def conway(row, col, grid):
 
 def update(frame_number, grid):
     new_grid = grid.copy()
-    for row in range(shape[0]):
-        for col in range(shape[1]):
+    for row in range(1, shape[0]):
+        for col in range(1, shape[1]):
             new_grid[row][col] = conway(row, col, grid)
     
     # grid = np.random.randint(1, (100, 100))
