@@ -39,7 +39,6 @@ def diffuse(row, col, grid):
     return total
 
 
-
     # attempt 2:
     # 0.0625    0.1625  0.0625
     # 0.1625    -1      0.1625
@@ -48,6 +47,12 @@ def diffuse(row, col, grid):
     # math will be included later
 
 
+def eaten():
+    # not sure how to do this
+
+
+def grown():
+    grow_rate = 0.02
 
 
 def update(frame_num, grid, img):
