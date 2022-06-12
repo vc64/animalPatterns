@@ -27,7 +27,7 @@ def diffuse(row, col, grid):
 
     # attempt 1:
     # 0.05  0.2     0.05
-    # 0.2   0.05    0.2
+    # 0.2   -1      0.2
     # 0.05  0.2     0.05
 
     # multiply freq of each surrounding square by corresponding rate
@@ -37,6 +37,15 @@ def diffuse(row, col, grid):
     total = edges * 0.2 + corners * 0.05 - 1
 
     return total
+
+
+
+    # attempt 2:
+    # 0.0625    0.1625  0.0625
+    # 0.1625    -1      0.1625
+    # 0.0625    0.1625  0.0625
+    # uses proportion of circle present in edge vs corner squares in 3x3 grid
+    # math will be included later
 
 
 
