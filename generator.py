@@ -39,12 +39,6 @@ def diffuse(row, col, grid):
 
     # multiply freq of each surrounding square by corresponding rate
 
-    edges = grid[row, col-1] + grid[row, col+1] + grid[row-1, col] + grid[row+1, col]
-    corners = grid[row-1, col-1] + grid[row-1, col+1] + grid[row+1, col-1] + grid[row+1, col+1]
-    total = edges * 0.1875 + corners * 0.0625 - 1 * curr
-
-    return total
-
 
     # attempt 2:
     # 0.0625    0.1875  0.0625
@@ -54,19 +48,32 @@ def diffuse(row, col, grid):
     # math will be included later
 
 
+    edges = grid[row, col-1] + grid[row, col+1] + grid[row-1, col] + grid[row+1, col]
+    corners = grid[row-1, col-1] + grid[row-1, col+1] + grid[row+1, col-1] + grid[row+1, col+1]
+    total = edges * 0.1875 + corners * 0.0625 - 1 * curr
+
+    return total
+
+
+    
+
+
 # def eaten():
 #     # not sure how to do this
 
 
-# def grown():
-#     grow_rate = 0.02
+def grown():
+    grow_rate = 0.002
+    if rng.random(1) <= grow_rate:
+        return 0.4
+    return 0
 
 
 def update(frame_num, grid, img):
     new_grid = grid.copy()
     for row in range(1, shape[0]):
         for col in range(1, shape[1]):
-            new_grid[row, col] += diffuse(row, col, grid)
+            new_grid[row, col] += diffuse(row, col, grid) + grown()
     
     # print(new_grid[45, 56])
     grid[:] = new_grid[:]
