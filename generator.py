@@ -40,16 +40,16 @@ def diffuse(row, col, grid):
     # multiply freq of each surrounding square by corresponding rate
 
     edges = grid[row, col-1] + grid[row, col+1] + grid[row-1, col] + grid[row+1, col]
-    corners = grid[row-1, col-1] + grid[row-1, col+1] + grid[row-1, col+1] + grid[row+1, col+1]
+    corners = grid[row-1, col-1] + grid[row-1, col+1] + grid[row+1, col-1] + grid[row+1, col+1]
     total = edges * 0.1875 + corners * 0.0625 - 1 * curr
 
     return total
 
 
     # attempt 2:
-    # 0.0625    0.1625  0.0625
-    # 0.1625    -1      0.1625
-    # 0.0625    0.1625  0.0625
+    # 0.0625    0.1875  0.0625
+    # 0.1875    -1      0.1875
+    # 0.0625    0.1875  0.0625
     # uses proportion of circle present in edge vs corner squares in 3x3 grid
     # math will be included later
 
