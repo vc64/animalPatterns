@@ -35,31 +35,56 @@ def diffuse(row, col, grid):
 
     # total = sum(grid[row-1:row+2, col+1]) + sum(grid[row-1:row+2, col]) + sum(grid[row-1:row+2, col-1]) - 1
 
-    # attempt 1:
-    # 0.05  0.2     0.05
-    # 0.2   -1      0.2
-    # 0.05  0.2     0.05
+    ## attempt 1:
+    ## 0.05  0.2     0.05
+    ## 0.2   -1      0.2
+    ## 0.05  0.2     0.05
 
-    # multiply freq of each surrounding square by corresponding rate
-
-
-    # attempt 2:
-    # 0.0625    0.1875  0.0625
-    # 0.1875    -1      0.1875
-    # 0.0625    0.1875  0.0625
-    # uses proportion of circle present in edge vs corner squares in 3x3 grid
-    # math will be included later
+    ## multiply freq of each surrounding square by corresponding rate
 
 
-    edges = grid[row, col-1] + grid[row, col+1] + grid[row-1, col] + grid[row+1, col]
-    corners = grid[row-1, col-1] + grid[row-1, col+1] + grid[row+1, col-1] + grid[row+1, col+1]
-    # total = edges * 0.1875 + corners * 0.0625 - 1 * curr
+    ## attempt 2:
+    ## 0.0625    0.1875  0.0625
+    ## 0.1875    -1      0.1875
+    ## 0.0625    0.1875  0.0625
+    ## uses proportion of circle present in edge vs corner squares in 3x3 grid
+    ## math will be included later
+
+
+    # edges = grid[row, col-1] + grid[row, col+1] + grid[row-1, col] + grid[row+1, col]
+    # corners = grid[row-1, col-1] + grid[row-1, col+1] + grid[row+1, col-1] + grid[row+1, col+1]
     
-    diffuse_ratio = 0.1 * np.array([0.1875, 0.0625, 1])
+    # diffuse_ratio = 0.1 * np.array([0.1875, 0.0625, 1])
     
-    total = edges * diffuse_ratio[0] + corners * diffuse_ratio[1] - curr * diffuse_ratio[2]
+    # total = edges * diffuse_ratio[0] + corners * diffuse_ratio[1] - curr * diffuse_ratio[2]
 
+    ## attempt 3: 
+    ## how can i make diffusion rate depend on concentration of nearby tiles?
 
+    ## base rates will be the same as attempt 2, but only when all concentrations are equal in the 8 squares around
+    ## need to vary all rates based on current concentration
+    
+    # # for i in range(3):
+    # #     for j in range(3):
+            
+
+    #         grid[row+(i-1), col+(j-1)]
+
+    edges = [grid[row, col-1], grid[row, col+1], grid[row-1, col], grid[row+1, col]]
+    corners = [grid[row-1, col-1], grid[row-1, col+1], grid[row+1, col-1], grid[row+1, col+1]]
+
+    total = 0
+    diffuse_ratio = np.array([0.1875, 0.0625, 1])
+
+    for edge in edges:
+        total += (edge - curr) * diffuse_ratio[0]
+
+    for corn in corners:
+        total += (corn - curr) * diffuse_ratio[1]
+
+    total -= curr
+    total *= max((1 - curr), 0)
+    # print(total)
 
     return total
 
@@ -108,7 +133,10 @@ def update(frame_num, gridA, gridI, img):
     gridI[:] = np.around(new_grid_inhib[:], decimals = 5)
 
     # grid = new_grid_active * (new_grid_inhib ** 2)
-    img.set_data(np.around(new_grid_active[1:-1, 1:-1]))
+
+    # grid = gridA - gridI
+
+    img.set_data(gridA[1:-1, 1:-1])
 
     return img,
 
