@@ -16,7 +16,7 @@ from matplotlib.animation import FuncAnimation
 
 fig = plt.figure(figsize=(7, 7))
 
-shape = np.array([20, 20])
+shape = np.array([100, 100])
 
 np.seterr('raise')
 
@@ -55,7 +55,7 @@ def diffuse(row, col, grid):
     corners = grid[row-1, col-1] + grid[row-1, col+1] + grid[row+1, col-1] + grid[row+1, col+1]
     # total = edges * 0.1875 + corners * 0.0625 - 1 * curr
     
-    diffuse_ratio = 0.1 * np.array([0.1875, 0.0625, 1.5])
+    diffuse_ratio = 0.1 * np.array([0.1875, 0.0625, 1])
     
     total = edges * diffuse_ratio[0] + corners * diffuse_ratio[1] - curr * diffuse_ratio[2]
 
@@ -93,27 +93,28 @@ def update(frame_num, gridA, gridI, img):
     # grid = gridA.copy()
     for row in range(1, shape[0]):
         for col in range(1, shape[1]):
-            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0.02)
-            new_grid_inhib[row, col] += diffuse(row, col, gridI) - changePeriodic(row, col, gridI, 0.05)
+            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0.01)
+            new_grid_inhib[row, col] += diffuse(row, col, gridI) - changePeriodic(row, col, gridI, 0.04)
 
             rxn = min(gridA[row, col], gridI[row, col] / 2)
             gridA[row, col] -= rxn
             gridI[row, col] += rxn * 1.5
     print(np.amax(new_grid_active))
-    if np.amax(new_grid_active) > prev:
-        np.new_grid_active.reshape(25,4).tolist()
+    # if np.amax(new_grid_active) > prev:
+    #     print(new_grid_active.reshape(shape+1).tolist())
+    #     quit()
 
     gridA[:] = np.around(new_grid_active[:], decimals = 5)
     gridI[:] = np.around(new_grid_inhib[:], decimals = 5)
 
     # grid = new_grid_active * (new_grid_inhib ** 2)
-    img.set_data(new_grid_active[1:-1, 1:-1])
+    img.set_data(np.around(new_grid_active[1:-1, 1:-1]))
 
     return img,
 
 animation_rate = 50
 
-img = plt.imshow(grid_active[1:-1, 1:-1], cmap = "inferno", interpolation = "nearest")
+img = plt.imshow(grid_active[1:-1, 1:-1], cmap = "viridis", interpolation = "nearest")
 animation = FuncAnimation(fig, update, fargs = (grid_active, grid_inhib, img,), interval = animation_rate, frames = 10)
 plt.show()
 
