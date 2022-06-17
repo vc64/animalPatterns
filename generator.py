@@ -83,7 +83,12 @@ def diffuse(row, col, grid):
         total += (corn - curr) * diffuse_ratio[1]
 
     total -= curr
-    total *= max((1 - curr), 0)
+    
+    if curr < 0:
+        total *= max((curr-1), 0)
+    else:
+        total *= max((1-curr), 0)
+    
     # print(total)
 
     return total
@@ -118,13 +123,13 @@ def update(frame_num, gridA, gridI, img):
     # grid = gridA.copy()
     for row in range(1, shape[0]):
         for col in range(1, shape[1]):
-            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0.01)
-            new_grid_inhib[row, col] += diffuse(row, col, gridI) - changePeriodic(row, col, gridI, 0.04)
+            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0.02)
+            new_grid_inhib[row, col] += diffuse(row, col, gridI) - changePeriodic(row, col, gridI, 0.02)
 
             rxn = min(gridA[row, col], gridI[row, col] / 2)
             gridA[row, col] -= rxn
             gridI[row, col] += rxn * 1.5
-    print(np.amax(new_grid_active))
+    print(np.amax(new_grid_active), np.amin(new_grid_active))
     # if np.amax(new_grid_active) > prev:
     #     print(new_grid_active.reshape(shape+1).tolist())
     #     quit()
