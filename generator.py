@@ -16,7 +16,7 @@ from matplotlib.animation import FuncAnimation
 
 fig = plt.figure(figsize=(7, 7))
 
-shape = np.array([100, 100])
+shape = np.array([10, 10])
 
 np.seterr('raise')
 
@@ -84,11 +84,12 @@ def diffuse(row, col, grid):
 
     total -= curr
     
-    if curr < 0:
-        total *= max((curr-1), 0)
-    else:
-        total *= max((1-curr), 0)
+    # if curr < 0:
+    #     total *= max((curr-1), 0)
+    # else:
+    #     total *= max((1-curr), 0)
     
+    total *= max((1-curr), 0)
     # print(total)
 
     return total
@@ -123,8 +124,8 @@ def update(frame_num, gridA, gridI, img):
     # grid = gridA.copy()
     for row in range(1, shape[0]):
         for col in range(1, shape[1]):
-            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0.02)
-            new_grid_inhib[row, col] += diffuse(row, col, gridI) - changePeriodic(row, col, gridI, 0.02)
+            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0)
+            new_grid_inhib[row, col] += diffuse(row, col, gridI) - changePeriodic(row, col, gridI, 0)
 
             rxn = min(gridA[row, col], gridI[row, col] / 2)
             gridA[row, col] -= rxn
@@ -139,9 +140,11 @@ def update(frame_num, gridA, gridI, img):
 
     # grid = new_grid_active * (new_grid_inhib ** 2)
 
-    # grid = gridA - gridI
+    grid = gridA - gridI
 
-    img.set_data(gridA[1:-1, 1:-1])
+    img.set_data(np.around(grid[1:-1, 1:-1]))
+
+    # img.set_data(gridA[1:-1, 1:-1])
 
     return img,
 
