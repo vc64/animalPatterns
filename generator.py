@@ -82,14 +82,14 @@ def diffuse(row, col, grid):
     for corn in corners:
         total += (corn - curr) * diffuse_ratio[1]
 
-    total -= curr
+    # total -= curr
     
     # if curr < 0:
     #     total *= max((curr-1), 0)
     # else:
     #     total *= max((1-curr), 0)
     
-    total *= max((1-curr), 0)
+    # total *= max((1-curr), 0)
     # print(total)
 
     return total
@@ -110,7 +110,7 @@ def changePeriodic(row, col, grid, rate):
     #     return np.around(rate * curr * (1 - curr), decimals = 5)
     # except:
     #     print(curr)
-    return rate * (0.9 - grid[row, col])
+    return rate * (1 - grid[row, col])
 
     # if rng.random(1) <= rate:
     #     return 0
@@ -124,8 +124,8 @@ def update(frame_num, gridA, gridI, img):
     # grid = gridA.copy()
     for row in range(1, shape[0]):
         for col in range(1, shape[1]):
-            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0)
-            new_grid_inhib[row, col] += diffuse(row, col, gridI) - changePeriodic(row, col, gridI, 0)
+            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0.35)
+            new_grid_inhib[row, col] += diffuse(row, col, gridI) - changePeriodic(row, col, gridI, 0.35)
 
             rxn = min(gridA[row, col], gridI[row, col] / 2)
             gridA[row, col] -= rxn
