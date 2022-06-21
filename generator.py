@@ -16,7 +16,7 @@ from matplotlib.animation import FuncAnimation
 
 fig = plt.figure(figsize=(7, 7))
 
-shape = np.array([10, 10])
+shape = np.array([100, 100])
 
 np.seterr('raise')
 
@@ -51,12 +51,12 @@ def diffuse(row, col, grid):
     ## math will be included later
 
 
-    # edges = grid[row, col-1] + grid[row, col+1] + grid[row-1, col] + grid[row+1, col]
-    # corners = grid[row-1, col-1] + grid[row-1, col+1] + grid[row+1, col-1] + grid[row+1, col+1]
+    edges = grid[row, col-1] + grid[row, col+1] + grid[row-1, col] + grid[row+1, col]
+    corners = grid[row-1, col-1] + grid[row-1, col+1] + grid[row+1, col-1] + grid[row+1, col+1]
     
-    # diffuse_ratio = 0.1 * np.array([0.1875, 0.0625, 1])
+    diffuse_ratio = 1 * np.array([0.1875, 0.0625, 1])
     
-    # total = edges * diffuse_ratio[0] + corners * diffuse_ratio[1] - curr * diffuse_ratio[2]
+    total = edges * diffuse_ratio[0] + corners * diffuse_ratio[1] - curr * diffuse_ratio[2]
 
     ## attempt 3: 
     ## how can i make diffusion rate depend on concentration of nearby tiles?
@@ -70,17 +70,17 @@ def diffuse(row, col, grid):
 
     #         grid[row+(i-1), col+(j-1)]
 
-    edges = [grid[row, col-1], grid[row, col+1], grid[row-1, col], grid[row+1, col]]
-    corners = [grid[row-1, col-1], grid[row-1, col+1], grid[row+1, col-1], grid[row+1, col+1]]
+    # edges = [grid[row, col-1], grid[row, col+1], grid[row-1, col], grid[row+1, col]]
+    # corners = [grid[row-1, col-1], grid[row-1, col+1], grid[row+1, col-1], grid[row+1, col+1]]
 
-    total = 0
-    diffuse_ratio = np.array([0.1875, 0.0625, 1])
+    # total = 0
+    # diffuse_ratio = np.array([0.1875, 0.0625, 1])
 
-    for edge in edges:
-        total += (edge - curr) * diffuse_ratio[0]
+    # for edge in edges:
+    #     total += (edge - curr) * diffuse_ratio[0]
 
-    for corn in corners:
-        total += (corn - curr) * diffuse_ratio[1]
+    # for corn in corners:
+    #     total += (corn - curr) * diffuse_ratio[1]
 
     # total -= curr
     
@@ -124,16 +124,20 @@ def update(frame_num, gridA, gridI, img):
     # grid = gridA.copy()
     for row in range(1, shape[0]):
         for col in range(1, shape[1]):
-            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0.35)
-            new_grid_inhib[row, col] += diffuse(row, col, gridI) - changePeriodic(row, col, gridI, 0.35)
-
             rxn = min(gridA[row, col], gridI[row, col] / 2)
-            gridA[row, col] -= rxn
-            gridI[row, col] += rxn * 1.5
+            new_grid_active[row, col] -= rxn
+            new_grid_inhib[row, col] += rxn * 1.5
+
+            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0) 
+            new_grid_inhib[row, col] += diffuse(row, col, gridI) - changePeriodic(row, col, gridI, 0)
+
+            # rxn = min(gridA[row, col], gridI[row, col] / 2)
+            # gridA[row, col] -= rxn
+            # gridI[row, col] += rxn * 1.5
     print(np.amax(new_grid_active), np.amin(new_grid_active))
-    # if np.amax(new_grid_active) > prev:
-    #     print(new_grid_active.reshape(shape+1).tolist())
-    #     quit()
+    if np.amax(new_grid_active) > prev:
+        # print(new_grid_active.reshape(shape+1).tolist())
+        q = True
 
     gridA[:] = np.around(new_grid_active[:], decimals = 5)
     gridI[:] = np.around(new_grid_inhib[:], decimals = 5)
@@ -141,10 +145,15 @@ def update(frame_num, gridA, gridI, img):
     # grid = new_grid_active * (new_grid_inhib ** 2)
 
     grid = gridA - gridI
+    # print(gridA)
 
-    img.set_data(np.around(grid[1:-1, 1:-1]))
+    # if np.amax(new_grid_active) > prev:
+    #     # print(new_grid_active.reshape(shape+1).tolist())
+    #     quit()
 
-    # img.set_data(gridA[1:-1, 1:-1])
+    # img.set_data(np.around(grid[1:-1, 1:-1]))
+
+    img.set_data(gridA[1:-1, 1:-1])
 
     return img,
 
