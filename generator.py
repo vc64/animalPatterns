@@ -17,7 +17,7 @@ from scipy.ndimage.filters import gaussian_filter
 
 fig = plt.figure(figsize=(7, 7))
 
-shape = np.array([50, 50])
+shape = np.array([100, 100])
 
 np.seterr('raise')
 
@@ -27,9 +27,16 @@ np.seterr('raise')
 # replace_rate = 0.5
 # grid = np.random.choice([0, 1], size=shape+1, p=((1 - replace_rate), replace_rate))
 
-rng = default_rng()
-grid_active = rng.uniform(0.0, 1.0, shape+1)
-grid_inhib = rng.uniform(0.0, 1.0, shape+1)
+# rng = default_rng()
+grid_active = np.ones(shape+1)
+grid_inhib = np.zeros(shape+1)
+
+x = int(shape[0] / 2)
+y = int(shape[1] / 2)
+grid_inhib[x-2:x+2, y-2:y+2] += 1
+
+# grid_active = rng.uniform(0.0, 1.0, shape+1)
+# grid_inhib = rng.uniform(0.0, 1.0, shape+1)
 
 def diffuse(row, col, grid):
     curr = grid[row, col]
@@ -104,19 +111,19 @@ def diffuse(row, col, grid):
 #     # not sure how to do this
 
 
-def changePeriodic(row, col, grid, rate):
-    # return 0
-    # curr = np.around(grid[row, col], decimals = 5)
-    # # print(rate, curr)
-    # try:
-    #     return np.around(rate * curr * (1 - curr), decimals = 5)
-    # except:
-    #     print(curr)
-    return rate * (1 - grid[row, col])
+# def changePeriodic(row, col, grid, rate):
+#     # return 0
+#     # curr = np.around(grid[row, col], decimals = 5)
+#     # # print(rate, curr)
+#     # try:
+#     #     return np.around(rate * curr * (1 - curr), decimals = 5)
+#     # except:
+#     #     print(curr)
+#     return rate * (1 - grid[row, col])
 
-    # if rng.random(1) <= rate:
-    #     return 0
-    # return 0
+#     # if rng.random(1) <= rate:
+#     #     return 0
+#     # return 0
 
 
 prev = 1
@@ -130,17 +137,22 @@ def update(frame_num, gridA, gridI, img):
             # new_grid_active[row, col] -= rxn
             # new_grid_inhib[row, col] += rxn
 
-            rxn = min(1, gridA[row, col]) * min(1, gridI[row, col]) ** 2
-            new_grid_active[row, col] -= rxn
-            new_grid_inhib[row, col] += rxn
+            # rxn = min(1, gridA[row, col]) * min(1, gridI[row, col]) ** 2
+            rxn = gridA[row, col] * gridI[row, col] ** 2
+            # new_grid_active[row, col] -= rxn
+            # new_grid_inhib[row, col] += rxn
 
-            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0.055) 
-            new_grid_inhib[row, col] += 0.5 * diffuse(row, col, gridI) - gridI[row, col] * 0.062
+            f = 0.0545
+            k = 0.062
+
+            new_grid_active[row, col] += diffuse(row, col, gridA) - rxn + (1 - gridA[row, col]) * f
+            new_grid_inhib[row, col] += 0.5 * diffuse(row, col, gridI) + rxn - gridI[row, col] * (f + k)
 
             # rxn = min(gridA[row, col], gridI[row, col] / 2)
             # gridA[row, col] -= rxn
             # gridI[row, col] += rxn * 1.5
-    print(np.amax(new_grid_active), np.amin(new_grid_active))
+    # print(np.amax(new_grid_active), np.amin(new_grid_active))
+    # print(new_grid_active)
     # if np.amax(new_grid_active) > prev:
     #     # print(new_grid_active.reshape(shape+1).tolist())
     #     q = True
@@ -157,8 +169,8 @@ def update(frame_num, gridA, gridI, img):
     #     # print(new_grid_active.reshape(shape+1).tolist())
     #     quit()
 
-    # img.set_data(np.around(grid[1:-1, 1:-1] + 0.25))
-    img.set_data(gridA[1:-1, 1:-1])
+    img.set_data(np.around(grid[1:-1, 1:-1]))
+    # img.set_data(gridA[1:-1, 1:-1])
 
     # blurred = gaussian_filter(gridA, sigma=1)
 
@@ -166,9 +178,9 @@ def update(frame_num, gridA, gridI, img):
 
     return img,
 
-animation_rate = 500
+animation_rate = 1
 
-img = plt.imshow(grid_active[1:-1, 1:-1], cmap = "viridis", interpolation = "nearest")
+img = plt.imshow(grid_inhib[1:-1, 1:-1], cmap = "viridis", interpolation = "nearest")
 animation = FuncAnimation(fig, update, fargs = (grid_active, grid_inhib, img,), interval = animation_rate, frames = 10)
 plt.show()
 
