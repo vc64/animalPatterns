@@ -55,7 +55,8 @@ def diffuse(row, col, grid):
     edges = grid[row, col-1] + grid[row, col+1] + grid[row-1, col] + grid[row+1, col]
     corners = grid[row-1, col-1] + grid[row-1, col+1] + grid[row+1, col-1] + grid[row+1, col+1]
     
-    diffuse_ratio = 1 * np.array([0.1875, 0.0625, 1])
+    # diffuse_ratio = 1 * np.array([0.1875, 0.0625, 1])
+    diffuse_ratio = np.array([0.2, 0.05, 1])
     
     total = edges * diffuse_ratio[0] + corners * diffuse_ratio[1] - curr * diffuse_ratio[2]
 
@@ -125,12 +126,16 @@ def update(frame_num, gridA, gridI, img):
     # grid = gridA.copy()
     for row in range(1, shape[0]):
         for col in range(1, shape[1]):
-            rxn = min(gridA[row, col], gridI[row, col] / 2)
-            new_grid_active[row, col] -= rxn
-            new_grid_inhib[row, col] += rxn * 1.5
+            # rxn = min(gridA[row, col], gridI[row, col] / 2)
+            # new_grid_active[row, col] -= rxn
+            # new_grid_inhib[row, col] += rxn
 
-            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0) 
-            new_grid_inhib[row, col] += diffuse(row, col, gridI) - changePeriodic(row, col, gridI, 0)
+            rxn = min(1, gridA[row, col]) * min(1, gridI[row, col]) ** 2
+            new_grid_active[row, col] -= rxn
+            new_grid_inhib[row, col] += rxn
+
+            new_grid_active[row, col] += diffuse(row, col, gridA) + changePeriodic(row, col, gridA, 0.055) 
+            new_grid_inhib[row, col] += 0.5 * diffuse(row, col, gridI) - gridI[row, col] * 0.062
 
             # rxn = min(gridA[row, col], gridI[row, col] / 2)
             # gridA[row, col] -= rxn
@@ -152,12 +157,12 @@ def update(frame_num, gridA, gridI, img):
     #     # print(new_grid_active.reshape(shape+1).tolist())
     #     quit()
 
-    # img.set_data(grid[1:-1, 1:-1])
-    # img.set_data(gridA[1:-1, 1:-1])
+    # img.set_data(np.around(grid[1:-1, 1:-1] + 0.25))
+    img.set_data(gridA[1:-1, 1:-1])
 
-    blurred = gaussian_filter(gridA, sigma=1)
+    # blurred = gaussian_filter(gridA, sigma=1)
 
-    img.set_data(blurred[1:-1, 1:-1])
+    # img.set_data(blurred[1:-1, 1:-1])
 
     return img,
 
