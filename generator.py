@@ -15,29 +15,12 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from scipy.ndimage.filters import gaussian_filter
 
-fig = plt.figure(figsize=(7, 7))
-
-shape = np.array([100, 100])
-
-np.seterr('raise')
-
-# grid = np.zeros(shape+1)
-# ones = np.ones(shape+1)
-
-# replace_rate = 0.5
-# grid = np.random.choice([0, 1], size=shape+1, p=((1 - replace_rate), replace_rate))
-
-# rng = default_rng()
-grid_active = np.ones(shape+1)
-grid_inhib = np.zeros(shape+1)
-
-x = int(shape[0] / 2)
-y = int(shape[1] / 2)
-grid_inhib[x-2:x+2, y-2:y+2] += 1
+from numba import jit
 
 # grid_active = rng.uniform(0.0, 1.0, shape+1)
 # grid_inhib = rng.uniform(0.0, 1.0, shape+1)
 
+@jit(nopython=True)
 def diffuse(row, col, grid):
     curr = grid[row, col]
 
@@ -125,9 +108,8 @@ def diffuse(row, col, grid):
 #     #     return 0
 #     # return 0
 
-
-prev = 1
-def update(frame_num, gridA, gridI, img):
+@jit(nopython=True)
+def update(gridA, gridI):
     new_grid_active = gridA.copy()
     new_grid_inhib = gridI.copy()
     # grid = gridA.copy()
@@ -142,8 +124,9 @@ def update(frame_num, gridA, gridI, img):
             # new_grid_active[row, col] -= rxn
             # new_grid_inhib[row, col] += rxn
 
-            f = 0.0545
-            k = 0.062
+            f = 0.0367
+            k = 0.0649
+            
 
             new_grid_active[row, col] += diffuse(row, col, gridA) - rxn + (1 - gridA[row, col]) * f
             new_grid_inhib[row, col] += 0.5 * diffuse(row, col, gridI) + rxn - gridI[row, col] * (f + k)
@@ -169,18 +152,52 @@ def update(frame_num, gridA, gridI, img):
     #     # print(new_grid_active.reshape(shape+1).tolist())
     #     quit()
 
-    img.set_data(np.around(grid[1:-1, 1:-1]))
+    
     # img.set_data(gridA[1:-1, 1:-1])
 
     # blurred = gaussian_filter(gridA, sigma=1)
 
     # img.set_data(blurred[1:-1, 1:-1])
 
+    return [gridA, gridI, grid]
+
+
+def updateN(frame_num, gridA, gridI, img, N):
+    for x in range(N):
+        gridA, gridI, out = update(gridA, gridI)
+    
+    img.set_data(out)
     return img,
 
-animation_rate = 1
+
+
+
+fig = plt.figure(figsize=(7, 7))
+
+shape = np.array([150, 150])
+
+np.seterr('raise')
+
+# grid = np.zeros(shape+1)
+# ones = np.ones(shape+1)
+
+# replace_rate = 0.5
+# grid = np.random.choice([0, 1], size=shape+1, p=((1 - replace_rate), replace_rate))
+
+# rng = default_rng()
+grid_active = np.ones(shape+1)
+grid_inhib = np.zeros(shape+1)
+
+x = int(shape[0] / 2)
+y = int(shape[1] / 2)
+grid_inhib[x-1:x+1, y-1:y+1] += 1
+
+
+animation_rate = 10
 
 img = plt.imshow(grid_inhib[1:-1, 1:-1], cmap = "viridis", interpolation = "nearest")
-animation = FuncAnimation(fig, update, fargs = (grid_active, grid_inhib, img,), interval = animation_rate, frames = 10)
+animation = FuncAnimation(fig, updateN, fargs = (grid_active, grid_inhib, img, 50,), 
+                            interval = animation_rate, blit=True)
 plt.show()
+
 
