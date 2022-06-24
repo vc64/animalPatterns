@@ -124,9 +124,14 @@ def update(gridA, gridI):
             # new_grid_active[row, col] -= rxn
             # new_grid_inhib[row, col] += rxn
 
-            f = 0.0367
-            k = 0.0649
-            
+            # f = 0.0367
+            # k = 0.0649
+
+            # f = 0.028 + row/10000
+            # k = 0.0575 + col/10000
+
+            f=0.03
+            k=0.06
 
             new_grid_active[row, col] += diffuse(row, col, gridA) - rxn + (1 - gridA[row, col]) * f
             new_grid_inhib[row, col] += 0.5 * diffuse(row, col, gridI) + rxn - gridI[row, col] * (f + k)
@@ -174,7 +179,7 @@ def updateN(frame_num, gridA, gridI, img, N):
 
 fig = plt.figure(figsize=(7, 7))
 
-shape = np.array([150, 150])
+shape = np.array([300, 300])
 
 np.seterr('raise')
 
@@ -196,8 +201,8 @@ grid_inhib[x-1:x+1, y-1:y+1] += 1
 animation_rate = 10
 
 img = plt.imshow(grid_inhib[1:-1, 1:-1], cmap = "viridis", interpolation = "nearest")
-animation = FuncAnimation(fig, updateN, fargs = (grid_active, grid_inhib, img, 50,), 
-                            interval = animation_rate, blit=True)
+animation = FuncAnimation(fig, updateN, fargs = (grid_active, grid_inhib, img, 25,), 
+                            interval = animation_rate, blit=True, cache_frame_data = False)
 plt.show()
 
 
