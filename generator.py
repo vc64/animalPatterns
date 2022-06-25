@@ -46,8 +46,8 @@ def diffuse(row, col, grid):
     edges = grid[row, col-1] + grid[row, col+1] + grid[row-1, col] + grid[row+1, col]
     corners = grid[row-1, col-1] + grid[row-1, col+1] + grid[row+1, col-1] + grid[row+1, col+1]
     
-    # diffuse_ratio = 1 * np.array([0.1875, 0.0625, 1])
-    diffuse_ratio = np.array([0.2, 0.05, 1])
+    diffuse_ratio = 1 * np.array([0.1875, 0.0625, 1])
+    # diffuse_ratio = np.array([0.2, 0.05, 1])
     
     total = edges * diffuse_ratio[0] + corners * diffuse_ratio[1] - curr * diffuse_ratio[2]
 
@@ -131,8 +131,12 @@ def update(gridA, gridI):
             # f = 0.028 + row/10000
             # k = 0.0575 + col/10000
 
-            f=0.03
-            k=0.06
+            f=0.029
+            k=0.057
+
+            # f = 0.028
+            # k = 0.062
+
 
             new_grid_active[row, col] += diffuse(row, col, gridA) - rxn + (1 - gridA[row, col]) * f
             new_grid_inhib[row, col] += 0.5 * diffuse(row, col, gridI) + rxn - gridI[row, col] * (f + k)
@@ -172,7 +176,7 @@ def updateN(frame_num, gridA, gridI, img, N):
     for x in range(N):
         gridA, gridI, out = update(gridA, gridI)
     
-    img.set_data(out)
+    img.set_data(out[1:-1, 1:-1])
     return img,
 
 
@@ -184,34 +188,43 @@ shape = np.array([300, 300])
 
 np.seterr('raise')
 
-# grid = np.zeros(shape+1)
-# ones = np.ones(shape+1)
 
-# replace_rate = 0.5
-# grid = np.random.choice([0, 1], size=shape+1, p=((1 - replace_rate), replace_rate))
 
 # rng = default_rng()
+# grid_active = rng.uniform(0.3, 1.0, shape+1)
+# grid_inhib = rng.uniform(0.0, 0.19, shape+1)
+
+
+
 grid_active = np.ones(shape+1)
 grid_inhib = np.zeros(shape+1)
 
 x = int(shape[0] / 2)
 y = int(shape[1] / 2)
+
+x += 50
+y += 20
+grid_inhib[x-1:x+1, y-1:y+1] += 1
+
+x -= 80
+y -= 30
 grid_inhib[x-1:x+1, y-1:y+1] += 1
 
 
-animation_rate = 5
 
-img = plt.imshow(grid_inhib[1:-1, 1:-1], cmap = "viridis", interpolation = "nearest")
-anim = FuncAnimation(fig, updateN, fargs = (grid_active, grid_inhib, img, 100,), 
+animation_rate = 10
+
+img = plt.imshow(grid_inhib[1:-1, 1:-1], cmap = "Purples_r", interpolation = "nearest")
+anim = FuncAnimation(fig, updateN, fargs = (grid_active, grid_inhib, img, 75,), 
                             interval = animation_rate, blit=True, 
-                            cache_frame_data = False, save_count = 250)
+                            cache_frame_data = False, save_count = 200)
 
 # writervideo = animation.FFMpegWriter(fps=60)
 # anim.save('increasingStraightLine.mp4', writer=writervideo)
 # plt.show()
 
-anim.save("pattern.gif", fps = 20, dpi = 100)
+anim.save("labrynth3.gif", fps = 20, dpi = 100)
 
-plt.show()
+# plt.show()
 
 
