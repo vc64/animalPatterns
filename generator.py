@@ -14,6 +14,7 @@ from numpy.random import default_rng
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from scipy.ndimage.filters import gaussian_filter
+from matplotlib import animation
 
 from numba import jit
 
@@ -198,11 +199,19 @@ y = int(shape[1] / 2)
 grid_inhib[x-1:x+1, y-1:y+1] += 1
 
 
-animation_rate = 10
+animation_rate = 5
 
 img = plt.imshow(grid_inhib[1:-1, 1:-1], cmap = "viridis", interpolation = "nearest")
-animation = FuncAnimation(fig, updateN, fargs = (grid_active, grid_inhib, img, 25,), 
-                            interval = animation_rate, blit=True, cache_frame_data = False)
+anim = FuncAnimation(fig, updateN, fargs = (grid_active, grid_inhib, img, 100,), 
+                            interval = animation_rate, blit=True, 
+                            cache_frame_data = False, save_count = 250)
+
+# writervideo = animation.FFMpegWriter(fps=60)
+# anim.save('increasingStraightLine.mp4', writer=writervideo)
+# plt.show()
+
+anim.save("pattern.gif", fps = 20, dpi = 100)
+
 plt.show()
 
 
