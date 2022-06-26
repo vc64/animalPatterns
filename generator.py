@@ -131,11 +131,12 @@ def update(gridA, gridI):
             # f = 0.028 + row/10000
             # k = 0.0575 + col/10000
 
-            f=0.029
-            k=0.057
+            # labrynth
+            # f=0.029
+            # k=0.057
 
-            # f = 0.028
-            # k = 0.062
+            f = 0.035
+            k = 0.062
 
 
             new_grid_active[row, col] += diffuse(row, col, gridA) - rxn + (1 - gridA[row, col]) * f
@@ -202,12 +203,12 @@ grid_inhib = np.zeros(shape+1)
 x = int(shape[0] / 2)
 y = int(shape[1] / 2)
 
-x += 50
-y += 20
+x += 20
+y += 10
 grid_inhib[x-1:x+1, y-1:y+1] += 1
 
-x -= 80
-y -= 30
+x -= 30
+y -= 10
 grid_inhib[x-1:x+1, y-1:y+1] += 1
 
 
@@ -223,7 +224,7 @@ anim = FuncAnimation(fig, updateN, fargs = (grid_active, grid_inhib, img, 75,),
 # anim.save('increasingStraightLine.mp4', writer=writervideo)
 # plt.show()
 
-anim.save("labrynth3.gif", fps = 20, dpi = 100)
+anim.save("solitons1.gif", fps = 20, dpi = 100)
 
 # plt.show()
 
